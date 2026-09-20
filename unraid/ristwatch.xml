@@ -3,7 +3,7 @@
   <Name>RISTWatch</Name>
   <Repository>ghcr.io/catjamstudio/ristwatch:latest</Repository>
   <Registry>https://github.com/catjamstudio/ristwatch/pkgs/container/ristwatch</Registry>
-  <Network>bridge</Network>
+  <Network>ristwatch-net</Network>
   <Privileged>false</Privileged>
   <Support>https://github.com/catjamstudio/ristwatch/issues</Support>
   <Project>https://github.com/catjamstudio/ristwatch</Project>
@@ -19,7 +19,9 @@
   <Requires/>
   <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/ristwatch" Mode="rw" Description="Persistent RISTWatch configuration, logs, and database." Type="Path" Display="always" Required="true" Mask="false"/>
   <Config Name="Web UI" Target="8080" Default="18081" Mode="tcp" Description="RISTWatch Web UI and API." Type="Port" Display="always" Required="true" Mask="false"/>
-  <Config Name="Test RIST" Target="5100" Default="5100" Mode="udp" Description="Development RIST listener. Do not reuse the production MooRIST port while both systems are installed." Type="Port" Display="always" Required="false" Mask="false"/>
+  <Config Name="RIST Ingest" Target="2030" Default="2030" Mode="udp" Description="RIST ingest listener." Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="RIST Secondary" Target="2031" Default="2031" Mode="udp" Description="Secondary RIST listener port." Type="Port" Display="always" Required="false" Mask="false"/>
+  <Config Name="RIST Relay" Target="5556" Default="5556" Mode="udp" Description="RIST relay output listener." Type="Port" Display="always" Required="false" Mask="false"/>
   <Config Name="RIST Enabled" Target="RISTWATCH_RIST_ENABLED" Default="true" Description="Start the real ristreceiver listener on the Test RIST port." Type="Variable" Display="always" Required="true" Mask="false"/>
   <Config Name="RIST Username" Target="RISTWATCH_RIST_USERNAME" Default="" Description="RIST SRP username. Stored as a Docker environment variable." Type="Variable" Display="always" Required="false" Mask="false"/>
   <Config Name="RIST Password" Target="RISTWATCH_RIST_PASSWORD" Default="" Description="RIST SRP password. Stored as a masked Docker environment variable." Type="Variable" Display="always" Required="false" Mask="true"/>

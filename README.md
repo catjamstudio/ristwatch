@@ -2,20 +2,20 @@
 
 RISTWatch is a self-hosted RIST ingest monitoring and management appliance designed for Unraid. This repository is a new application and does not modify, migrate, stop, or otherwise interact with an existing MooRIST installation.
 
-## Current milestone
+## Current milestone — RISTWatch 0.5.0 (build 10)
 
 The initial build provides:
 
 - A FastAPI backend with health, system, stream, and WebSocket telemetry APIs.
 - An independently testable parser for libRIST-style statistics.
 - Configurable health-state calculation.
-- A responsive React and TypeScript dashboard using simulated telemetry.
+- A responsive React and TypeScript dashboard with live/stale state, bitrate history, relay status, system status, and peer identity.
 - A single production Docker image containing the compiled UI, API, and libRIST tools.
 - Persistent configuration under `/config`.
 - Development defaults of `18081 -> 8080/tcp` and `5100 -> 5100/udp`.
 - An initial Unraid Docker template and CI workflow.
 
-Real libRIST process control is deliberately disabled by default until representative receiver output is captured and tested.
+Real libRIST process control is enabled with `RISTWATCH_RIST_ENABLED=true` and consumes native libRIST receiver statistics.
 
 ## Architecture
 
@@ -108,10 +108,12 @@ docker build -t ristwatch:dev .
 Use `unraid/ristwatch.xml` as the starting Community Applications-style template. Its defaults are intentionally separate from MooRIST:
 
 - Web UI: host `18081` to container `8080/tcp`
-- Test RIST: host `5100` to container `5100/udp`
+- RIST ingest: host `2030` to container `2030/udp`
+- RIST secondary: host `2031` to container `2031/udp`
+- RIST relay: host `5556` to container `5556/udp`
 - Appdata: `/mnt/user/appdata/ristwatch` to `/config`
 
-Do not deploy the production RIST ports until RISTWatch has been validated beside the existing fallback system.
+The template provides the WebUI link and restores Unraid's Edit workflow when the container is created from the template. Existing CLI-created containers must be recreated from the template to regain those controls.
 
 ## Known limitations
 
