@@ -9,10 +9,10 @@ The initial build provides:
 - A FastAPI backend with health, system, stream, and WebSocket telemetry APIs.
 - An independently testable parser for libRIST-style statistics.
 - Configurable health-state calculation.
-- A responsive React and TypeScript dashboard with live/stale state, bitrate history, relay status, system status, and peer identity.
+- A responsive React and TypeScript dashboard with live/stale state, bitrate history, relay status, system status, peer identity, and source-IP display when supplied by libRIST.
 - A single production Docker image containing the compiled UI, API, and libRIST tools.
 - Persistent configuration under `/config`.
-- Development defaults of `18081 -> 8080/tcp` and `5100 -> 5100/udp`.
+- Production defaults of `18081 -> 8080/tcp`, `2030 -> 2030/udp`, `2031 -> 2031/udp`, and `5556 -> 5556/udp`.
 - An initial Unraid Docker template and CI workflow.
 
 Real libRIST process control is enabled with `RISTWATCH_RIST_ENABLED=true` and consumes native libRIST receiver statistics.
@@ -25,8 +25,8 @@ Browser
   v
 FastAPI ---- Stream service ---- Telemetry collector
   |                                  |
-  |                                  +-- mock source (current default)
-  |                                  +-- libRIST parser/process adapter (next milestone)
+  |                                  +-- native libRIST receiver statistics
+  |                                  +-- persisted live telemetry
   v
 /config/config.yaml and /config/ristwatch.db
 ```
@@ -82,15 +82,7 @@ Runtime data is written to `./.local/config` by the included Compose file. On Un
 
 At first startup, `config/default.yaml` is copied to `/config/config.yaml`. Health thresholds are configuration, not application constants. Set `telemetry.mock: false` only after the libRIST process adapter is enabled and validated against real receiver output.
 
-RIST credentials may be stored as the private runtime backup in `/config/config.yaml`:
-
-```yaml
-rist_auth:
-  username: "YOUR_USERNAME"
-  password: "YOUR_PASSWORD"
-```
-
-On Unraid this file is `/mnt/user/appdata/ristwatch/config.yaml`. Docker variables `RISTWATCH_RIST_USERNAME` and `RISTWATCH_RIST_PASSWORD`, when populated, override these file values. Keep real credentials out of Git and out of `config/default.yaml`.
+RIST credentials are supplied through the container environment. Set `RISTWATCH_RIST_USERNAME` and `RISTWATCH_RIST_PASSWORD` in the Unraid template; credentials are not read from `config.yaml`. The dashboard displays the username and a length-matched password mask, never the password itself.
 
 Never commit usernames, passwords, encryption secrets, public IP addresses, or production stream configuration.
 
@@ -127,11 +119,11 @@ The template provides the WebUI link and restores Unraid's Edit workflow when th
 
 ## Known limitations
 
-- Telemetry is simulated until real libRIST output samples are captured.
-- RIST subprocess lifecycle methods are defined but not started automatically.
+- Peer source IP is displayed when the installed libRIST statistics payload includes it; otherwise the dashboard reports it as unavailable.
+- Authentication for the Web UI is not implemented yet; bind it only to trusted networks.
 - SQLite history and stream mutation endpoints are reserved for later milestones.
 - Authentication for the Web UI is not implemented yet; bind it only to trusted networks.
 
-## Recommended next task
+## Release notes
 
-Capture sanitized `ristreceiver -v 6` statistics from a test feed on UDP `5100`, add them as parser fixtures, and implement the managed receiver process without changing the existing MooRIST deployment.
+Build 20 includes the live peer source-IP field, dynamic credential identity display, fixed `RIST Ingest` naming, relay/system panels, and native libRIST telemetry integration.
