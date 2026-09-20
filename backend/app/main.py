@@ -20,6 +20,7 @@ async def lifespan(app: FastAPI):
         interval=config.telemetry_interval,
         rist_enabled=config.rist_enabled,
         srp_file=str(config.rist_srp_file),
+        stats_timeout=config.stats_timeout_seconds,
     )
     await app.state.telemetry.start()
     yield
@@ -41,4 +42,5 @@ async def frontend(path: str):
     if index.exists():
         return FileResponse(index)
     return {"name": "RISTWatch", "api_docs": "/docs"}
+
 
