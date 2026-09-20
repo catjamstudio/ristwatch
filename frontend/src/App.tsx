@@ -78,7 +78,7 @@ function App() {
       <header className="topbar">
         <div>
           <span className="eyebrow">RIST CONTRIBUTION MONITOR</span>
-          <h1>RISTWatch <small>0.5.0 · build 10</small></h1>
+          <h1>RISTWatch <small>0.5.0 · build 20</small></h1>
           {system && <div className="identity">Username: {system.rist_username || "not set"} · Password: {system.rist_password_mask || "not set"}</div>}
         </div>
         <div className="connection">

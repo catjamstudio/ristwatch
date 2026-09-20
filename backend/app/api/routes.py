@@ -28,7 +28,7 @@ async def system(request: Request) -> dict:
     return {
         "name": "RISTWatch",
         "version": request.app.version,
-        "build": 10,
+        "build": 20,
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "mock_telemetry": config.mock_telemetry,
