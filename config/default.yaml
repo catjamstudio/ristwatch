@@ -6,6 +6,9 @@ telemetry:
   mock: true
   interval_seconds: 1
 
+rist:
+  enabled: false
+
 health:
   degraded:
     max_rtt_ms: 180

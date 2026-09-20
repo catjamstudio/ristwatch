@@ -44,6 +44,15 @@ class RistStatsParser:
             buffer_ms=float(self._number(stats, "avg_buffer_time")),
         )
 
+    def parse_log_line(self, line: str, stream_id: str) -> TelemetrySnapshot | None:
+        json_start = line.find("{")
+        if json_start < 0:
+            return None
+        try:
+            return self.parse(line[json_start:], stream_id)
+        except (ValueError, json.JSONDecodeError):
+            return None
+
     @staticmethod
     def _decode(payload: str | bytes | Mapping[str, Any]) -> Mapping[str, Any]:
         if isinstance(payload, Mapping):
@@ -78,13 +87,15 @@ class RistStatsParser:
 
     @classmethod
     def _parse_peer(cls, peer: Mapping[str, Any]) -> PeerTelemetry:
+        stats = peer.get("stats")
+        values = stats if isinstance(stats, Mapping) else peer
         return PeerTelemetry(
             id=str(peer.get("id", "unknown")),
             cname=str(peer["cname"]) if peer.get("cname") is not None else None,
-            bitrate_bps=int(cls._number(peer, "bitrate")),
-            average_bitrate_bps=int(cls._number(peer, "avg_bitrate")),
-            rtt_ms=cls._number(peer, "rtt"),
-            average_rtt_ms=cls._number(peer, "avg_rtt"),
-            received_bytes=int(cls._number(peer, "received_bytes")),
+            bitrate_bps=int(cls._number(values, "bitrate")),
+            average_bitrate_bps=int(cls._number(values, "avg_bitrate")),
+            rtt_ms=cls._number(values, "rtt"),
+            average_rtt_ms=cls._number(values, "avg_rtt"),
+            received_bytes=int(cls._number(values, "received_bytes")),
         )
 

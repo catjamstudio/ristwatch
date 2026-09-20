@@ -17,7 +17,21 @@ class AppConfig:
 
     @property
     def mock_telemetry(self) -> bool:
+        override = os.getenv("RISTWATCH_MOCK_TELEMETRY")
+        if override is not None:
+            return override.lower() in {"1", "true", "yes", "on"}
         return bool(self.raw.get("telemetry", {}).get("mock", True))
+
+    @property
+    def rist_enabled(self) -> bool:
+        override = os.getenv("RISTWATCH_RIST_ENABLED")
+        if override is not None:
+            return override.lower() in {"1", "true", "yes", "on"}
+        return bool(self.raw.get("rist", {}).get("enabled", False))
+
+    @property
+    def rist_srp_file(self) -> Path:
+        return self.config_dir / "ristwatch.srp"
 
     @property
     def telemetry_interval(self) -> float:

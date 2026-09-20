@@ -1,20 +1,50 @@
 import asyncio
 import math
+import os
 import time
 from collections.abc import AsyncIterator
 
 from app.models.stream import StreamConfig, StreamSnapshot
 from app.models.telemetry import PeerTelemetry, TelemetrySnapshot
+from app.rist.parser import RistStatsParser
+from app.rist.process_manager import RistProcessManager
 from app.services.health import HealthInputs, calculate_health
 
 
 class TelemetryService:
-    def __init__(self, streams: list[StreamConfig], policy: dict, interval: float = 1) -> None:
+    def __init__(self, streams: list[StreamConfig], policy: dict, interval: float = 1, rist_enabled: bool = False, srp_file: str | None = None) -> None:
         self.streams = streams
         self.policy = policy
         self.interval = interval
         self.started_at = time.monotonic()
         self._latest: dict[str, TelemetrySnapshot] = {}
+        self.rist_enabled = rist_enabled
+        self.srp_file = srp_file
+        self.process = RistProcessManager()
+        self.parser = RistStatsParser(policy)
+        self._reader_task: asyncio.Task | None = None
+
+    async def start(self) -> None:
+        if not self.rist_enabled or not self.streams:
+            return
+        stream = self.streams[0]
+        input_url = stream.input_url
+        command = ["ristreceiver", "-i", input_url, "-o", "udp://127.0.0.1:10000", "-S", "1000", "-v", "6"]
+        if self.srp_file and os.path.exists(self.srp_file):
+            command.extend(["-F", self.srp_file])
+        await self.process.start(command)
+        self._reader_task = asyncio.create_task(self._read_receiver(stream.id))
+
+    async def stop(self) -> None:
+        if self._reader_task:
+            self._reader_task.cancel()
+        await self.process.stop()
+
+    async def _read_receiver(self, stream_id: str) -> None:
+        async for line in self.process.output_lines():
+            snapshot = self.parser.parse_log_line(line, stream_id)
+            if snapshot:
+                self._latest[stream_id] = snapshot
 
     def snapshots(self) -> list[StreamSnapshot]:
         return [StreamSnapshot(config=stream, telemetry=self.snapshot(stream)) for stream in self.streams]
@@ -23,7 +53,7 @@ class TelemetryService:
         existing = self._latest.get(stream.id)
         if existing is not None:
             return existing
-        return self._mock_snapshot(stream)
+        return self._mock_snapshot(stream) if not self.rist_enabled else TelemetrySnapshot(stream_id=stream.id)
 
     def get(self, stream_id: str) -> StreamSnapshot | None:
         stream = next((item for item in self.streams if item.id == stream_id), None)
@@ -31,8 +61,9 @@ class TelemetryService:
 
     async def stream(self) -> AsyncIterator[list[StreamSnapshot]]:
         while True:
-            for configured_stream in self.streams:
-                self._latest[configured_stream.id] = self._mock_snapshot(configured_stream)
+            if not self.rist_enabled:
+                for configured_stream in self.streams:
+                    self._latest[configured_stream.id] = self._mock_snapshot(configured_stream)
             yield self.snapshots()
             await asyncio.sleep(self.interval)
 

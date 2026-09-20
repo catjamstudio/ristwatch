@@ -20,5 +20,8 @@
   <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/ristwatch" Mode="rw" Description="Persistent RISTWatch configuration, logs, and database." Type="Path" Display="always" Required="true" Mask="false"/>
   <Config Name="Web UI" Target="8080" Default="18081" Mode="tcp" Description="RISTWatch Web UI and API." Type="Port" Display="always" Required="true" Mask="false"/>
   <Config Name="Test RIST" Target="5100" Default="5100" Mode="udp" Description="Development RIST listener. Do not reuse the production MooRIST port while both systems are installed." Type="Port" Display="always" Required="false" Mask="false"/>
+  <Config Name="RIST Enabled" Target="RISTWATCH_RIST_ENABLED" Default="true" Description="Start the real ristreceiver listener on the Test RIST port." Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="RIST Username" Target="RISTWATCH_RIST_USERNAME" Default="" Description="RIST SRP username. Stored as a Docker environment variable." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="RIST Password" Target="RISTWATCH_RIST_PASSWORD" Default="" Description="RIST SRP password. Stored as a masked Docker environment variable." Type="Variable" Display="always" Required="false" Mask="true"/>
 </Container>
 

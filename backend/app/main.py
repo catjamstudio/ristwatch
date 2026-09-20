@@ -18,8 +18,12 @@ async def lifespan(app: FastAPI):
         streams=config.streams,
         policy=config.health_policy,
         interval=config.telemetry_interval,
+        rist_enabled=config.rist_enabled,
+        srp_file=str(config.rist_srp_file),
     )
+    await app.state.telemetry.start()
     yield
+    await app.state.telemetry.stop()
 
 
 app = FastAPI(title="RISTWatch API", version="0.1.0", lifespan=lifespan)
