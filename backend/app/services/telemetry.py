@@ -77,7 +77,19 @@ class TelemetryService:
         print(f"ristreceiver[{stream_id}] exited; no further receiver telemetry will be available", flush=True)
 
     def snapshots(self) -> list[StreamSnapshot]:
+        self._reload_persisted_snapshots()
         return [StreamSnapshot(config=stream, telemetry=self.snapshot(stream)) for stream in self.streams]
+
+    def _reload_persisted_snapshots(self) -> None:
+        if not self._snapshot_file.exists():
+            return
+        try:
+            cached = json.loads(self._snapshot_file.read_text(encoding="utf-8"))
+            for stream_id, candidate in cached.items():
+                if isinstance(candidate, dict):
+                    self._latest[stream_id] = TelemetrySnapshot.model_validate(candidate)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"Failed to load persisted telemetry: {exc}", flush=True)
 
     def snapshot(self, stream: StreamConfig) -> TelemetrySnapshot:
         existing = self._latest.get(stream.id)
