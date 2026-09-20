@@ -14,11 +14,24 @@ function App() {
   const [connected, setConnected] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const mergeStreams = (incoming: StreamSnapshot[]) => {
+    setStreams((current) => {
+      const currentById = new Map(current.map((stream) => [stream.config.id, stream]));
+      for (const stream of incoming) {
+        const previous = currentById.get(stream.config.id);
+        if (!previous || new Date(stream.telemetry.timestamp).getTime() >= new Date(previous.telemetry.timestamp).getTime()) {
+          currentById.set(stream.config.id, stream);
+        }
+      }
+      return incoming.map((stream) => currentById.get(stream.config.id) ?? stream);
+    });
+  };
+
   useEffect(() => {
     const refresh = () => {
-      fetch("/api/streams")
-        .then((response) => response.json())
-        .then((payload: StreamSnapshot[]) => setStreams(payload))
+        fetch("/api/streams")
+          .then((response) => response.json())
+          .then((payload: StreamSnapshot[]) => mergeStreams(payload))
         .catch(() => undefined);
     };
 
@@ -29,10 +42,10 @@ function App() {
     const socket = new WebSocket(`${protocol}://${window.location.host}/ws/telemetry`);
     socket.onopen = () => setConnected(true);
     socket.onclose = () => setConnected(false);
-    socket.onmessage = (event) => {
-      const payload = JSON.parse(event.data) as { streams: StreamSnapshot[] };
-      setStreams(payload.streams);
-    };
+      socket.onmessage = (event) => {
+        const payload = JSON.parse(event.data) as { streams: StreamSnapshot[] };
+        mergeStreams(payload.streams);
+      };
     return () => {
       window.clearInterval(refreshTimer);
       socket.close();
