@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import math
 import os
 import time
@@ -10,6 +11,9 @@ from app.models.telemetry import PeerTelemetry, TelemetrySnapshot
 from app.rist.parser import RistStatsParser
 from app.rist.process_manager import RistProcessManager
 from app.services.health import HealthInputs, calculate_health
+
+
+logger = logging.getLogger(__name__)
 
 
 class TelemetryService:
@@ -35,6 +39,7 @@ class TelemetryService:
         stream = self.streams[0]
         input_url = stream.input_url
         command = ["ristreceiver", "-i", input_url, "-o", "udp://127.0.0.1:10000", "-r", "127.0.0.1:5005", "-S", "1000", "-v", "6"]
+        logger.info("Starting RIST receiver for stream %s: %s", stream.id, " ".join(command))
         if self.srp_file and os.path.exists(self.srp_file):
             command.extend(["-F", self.srp_file])
         await self.process.start(command)
@@ -58,9 +63,11 @@ class TelemetryService:
 
     async def _read_receiver(self, stream_id: str) -> None:
         async for line in self.process.output_lines():
+            logger.info("ristreceiver[%s]: %s", stream_id, line)
             snapshot = self.parser.parse_log_line(line, stream_id)
             if snapshot:
                 self._latest[stream_id] = snapshot
+        logger.warning("ristreceiver[%s] exited; no further receiver telemetry will be available", stream_id)
 
     def snapshots(self) -> list[StreamSnapshot]:
         return [StreamSnapshot(config=stream, telemetry=self.snapshot(stream)) for stream in self.streams]
