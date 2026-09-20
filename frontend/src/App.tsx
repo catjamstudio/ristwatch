@@ -15,10 +15,15 @@ function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/streams")
-      .then((response) => response.json())
-      .then((payload: StreamSnapshot[]) => setStreams(payload))
-      .catch(() => undefined);
+    const refresh = () => {
+      fetch("/api/streams")
+        .then((response) => response.json())
+        .then((payload: StreamSnapshot[]) => setStreams(payload))
+        .catch(() => undefined);
+    };
+
+    refresh();
+    const refreshTimer = window.setInterval(refresh, 1000);
 
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const socket = new WebSocket(`${protocol}://${window.location.host}/ws/telemetry`);
@@ -28,7 +33,10 @@ function App() {
       const payload = JSON.parse(event.data) as { streams: StreamSnapshot[] };
       setStreams(payload.streams);
     };
-    return () => socket.close();
+    return () => {
+      window.clearInterval(refreshTimer);
+      socket.close();
+    };
   }, []);
 
   const totals = useMemo(
