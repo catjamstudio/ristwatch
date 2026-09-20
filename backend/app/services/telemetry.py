@@ -92,9 +92,10 @@ class TelemetryService:
 
 
     def ingest_stats(self, payload: bytes, stream_id: str) -> None:
-        try:
-            snapshot = self.parser.parse(payload, stream_id)
-        except (ValueError, UnicodeError):
+        line = payload.decode("utf-8", errors="replace").strip()
+        snapshot = self.parser.parse_log_line(line, stream_id)
+        if snapshot is None:
+            logger.debug("Ignored non-statistics receiver datagram for %s: %s", stream_id, line[:500])
             return
         self._latest[stream_id] = snapshot
         self._last_stats_at = time.monotonic()
