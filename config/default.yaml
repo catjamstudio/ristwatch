@@ -29,7 +29,6 @@ health:
 
 streams:
   - id: test-ingest
-    name: Test Ingest
     enabled: true
     input_url: rist://@:2030?profile=1
     buffer_ms: 1800
