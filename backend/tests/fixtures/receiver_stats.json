@@ -1,0 +1,26 @@
+{
+  "receiver-stats": {
+    "flowinstant": {
+      "flow_id": 10,
+      "peers": [
+        {
+          "id": 42,
+          "cname": "BELABOX",
+          "avg_bitrate": 5100000,
+          "avg_rtt": 20.2,
+          "bitrate": 5210288,
+          "received_bytes": 9123456,
+          "rtt": 18.6
+        }
+      ],
+      "stats": {
+        "avg_buffer_time": 1904,
+        "bitrate": 5210288,
+        "bitrate_payload": 5100000,
+        "bitrate_rejected": 0,
+        "bitrate_retries": 31742
+      }
+    }
+  }
+}
+

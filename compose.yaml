@@ -1,0 +1,20 @@
+services:
+  ristwatch:
+    build: .
+    image: ristwatch:dev
+    container_name: ristwatch-dev
+    restart: unless-stopped
+    environment:
+      RISTWATCH_CONFIG_DIR: /config
+    ports:
+      - "18081:8080/tcp"
+      - "5100:5100/udp"
+    volumes:
+      - ./.local/config:/config
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+

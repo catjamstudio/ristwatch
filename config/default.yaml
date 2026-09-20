@@ -1,0 +1,25 @@
+application:
+  name: RISTWatch
+  log_level: INFO
+
+telemetry:
+  mock: true
+  interval_seconds: 1
+
+health:
+  degraded:
+    max_rtt_ms: 180
+    max_retry_ratio: 0.08
+    min_bitrate_bps: 500000
+  unstable:
+    max_rtt_ms: 450
+    max_retry_ratio: 0.20
+    min_bitrate_bps: 100000
+
+streams:
+  - id: test-ingest
+    name: Test Ingest
+    enabled: true
+    input_url: rist://@:5100?profile=1
+    buffer_ms: 1800
+

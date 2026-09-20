@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>RISTWatch</Name>
+  <Repository>ghcr.io/catjamstudio/ristwatch:latest</Repository>
+  <Registry>https://github.com/catjamstudio/ristwatch/pkgs/container/ristwatch</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/catjamstudio/ristwatch/issues</Support>
+  <Project>https://github.com/catjamstudio/ristwatch</Project>
+  <Overview>Self-hosted RIST ingest monitoring and management appliance. Default ports are isolated from an existing MooRIST deployment.</Overview>
+  <Category>MediaApp:Video Status:Stable</Category>
+  <WebUI>http://[IP]:[PORT:8080]/</WebUI>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>0</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/ristwatch" Mode="rw" Description="Persistent RISTWatch configuration, logs, and database." Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="Web UI" Target="8080" Default="18081" Mode="tcp" Description="RISTWatch Web UI and API." Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="Test RIST" Target="5100" Default="5100" Mode="udp" Description="Development RIST listener. Do not reuse the production MooRIST port while both systems are installed." Type="Port" Display="always" Required="false" Mask="false"/>
+</Container>
+

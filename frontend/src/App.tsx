@@ -1,0 +1,134 @@
+import { useEffect, useMemo, useState } from "react";
+import type { StreamSnapshot } from "./types";
+
+const formatMbps = (value: number) => `${(value / 1_000_000).toFixed(2)} Mbps`;
+const formatSeconds = (value: number) => {
+  const hours = Math.floor(value / 3600);
+  const minutes = Math.floor((value % 3600) / 60);
+  const seconds = value % 60;
+  return [hours, minutes, seconds].map((part) => String(part).padStart(2, "0")).join(":");
+};
+
+function App() {
+  const [streams, setStreams] = useState<StreamSnapshot[]>([]);
+  const [connected, setConnected] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/streams")
+      .then((response) => response.json())
+      .then((payload: StreamSnapshot[]) => setStreams(payload))
+      .catch(() => undefined);
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${window.location.host}/ws/telemetry`);
+    socket.onopen = () => setConnected(true);
+    socket.onclose = () => setConnected(false);
+    socket.onmessage = (event) => {
+      const payload = JSON.parse(event.data) as { streams: StreamSnapshot[] };
+      setStreams(payload.streams);
+    };
+    return () => socket.close();
+  }, []);
+
+  const totals = useMemo(
+    () => ({
+      active: streams.filter((stream) => stream.telemetry.status !== "offline").length,
+      bitrate: streams.reduce((sum, stream) => sum + stream.telemetry.bitrate_bps, 0),
+      peers: streams.reduce((sum, stream) => sum + stream.telemetry.peers.length, 0),
+      alerts: streams.filter((stream) => ["degraded", "unstable", "offline"].includes(stream.telemetry.status)).length,
+    }),
+    [streams],
+  );
+
+  const selected = streams.find((stream) => stream.config.id === selectedId) ?? streams[0];
+
+  return (
+    <main>
+      <header className="topbar">
+        <div>
+          <span className="eyebrow">RIST CONTRIBUTION MONITOR</span>
+          <h1>RISTWatch</h1>
+        </div>
+        <div className="connection">
+          <span className={`pulse ${connected ? "online" : "offline"}`} />
+          {connected ? "Live telemetry" : "Reconnecting"}
+        </div>
+      </header>
+
+      <section className="summary-grid">
+        <Summary label="Active Ingests" value={String(totals.active)} />
+        <Summary label="Total Bitrate" value={formatMbps(totals.bitrate)} />
+        <Summary label="Connected Peers" value={String(totals.peers)} />
+        <Summary label="Alerts" value={String(totals.alerts)} alert={totals.alerts > 0} />
+      </section>
+
+      <section className="panel table-panel">
+        <div className="panel-heading">
+          <div><span className="eyebrow">CURRENT STATE</span><h2>Ingests</h2></div>
+          <span>{streams.length} configured</span>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead><tr><th>Name</th><th>Status</th><th>Bitrate</th><th>RTT</th><th>Peers</th><th>Recovery</th><th>Buffer</th><th>Uptime</th></tr></thead>
+            <tbody>
+              {streams.map((stream) => (
+                <tr key={stream.config.id} onClick={() => setSelectedId(stream.config.id)} className={selected?.config.id === stream.config.id ? "selected" : ""}>
+                  <td><strong>{stream.config.name}</strong><small>{stream.config.id}</small></td>
+                  <td><span className={`status ${stream.telemetry.status}`}>{stream.telemetry.status}</span></td>
+                  <td>{formatMbps(stream.telemetry.bitrate_bps)}</td>
+                  <td>{stream.telemetry.rtt_ms.toFixed(1)} ms</td>
+                  <td>{stream.telemetry.peers.length}</td>
+                  <td>{(stream.telemetry.retries_bps / 1000).toFixed(1)} Kbps</td>
+                  <td>{stream.telemetry.buffer_ms.toFixed(0)} ms</td>
+                  <td>{formatSeconds(stream.telemetry.uptime_seconds)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {selected && <StreamDetails stream={selected} />}
+    </main>
+  );
+}
+
+function Summary({ label, value, alert = false }: { label: string; value: string; alert?: boolean }) {
+  return <article className="summary"><span>{label}</span><strong className={alert ? "alert" : ""}>{value}</strong></article>;
+}
+
+function StreamDetails({ stream }: { stream: StreamSnapshot }) {
+  const telemetry = stream.telemetry;
+  return (
+    <section className="details-grid">
+      <article className="panel detail-panel">
+        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2></div><span className={`status ${telemetry.status}`}>{telemetry.status}</span></div>
+        <div className="metric-grid">
+          <Metric label="Current bitrate" value={formatMbps(telemetry.bitrate_bps)} />
+          <Metric label="Average bitrate" value={formatMbps(telemetry.average_bitrate_bps)} />
+          <Metric label="Current RTT" value={`${telemetry.rtt_ms.toFixed(1)} ms`} />
+          <Metric label="Average RTT" value={`${telemetry.average_rtt_ms.toFixed(1)} ms`} />
+          <Metric label="Recovery" value={`${(telemetry.retries_bps / 1000).toFixed(1)} Kbps`} />
+          <Metric label="Rejected" value={`${(telemetry.rejected_bps / 1000).toFixed(1)} Kbps`} />
+        </div>
+        <div className="chart-placeholder"><span>Realtime history begins with the next milestone</span></div>
+      </article>
+      <article className="panel peers-panel">
+        <div className="panel-heading"><div><span className="eyebrow">CONNECTIONS</span><h2>Peers</h2></div><span>{telemetry.peers.length}</span></div>
+        {telemetry.peers.map((peer) => (
+          <div className="peer" key={peer.id}>
+            <div><strong>{peer.cname ?? peer.id}</strong><small>{peer.id}</small></div>
+            <div><span>{formatMbps(peer.bitrate_bps)}</span><small>{peer.rtt_ms.toFixed(1)} ms RTT</small></div>
+          </div>
+        ))}
+      </article>
+    </section>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div className="metric"><span>{label}</span><strong>{value}</strong></div>;
+}
+
+export default App;
