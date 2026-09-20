@@ -60,7 +60,14 @@ def load_config() -> AppConfig:
             config_file.write_text("telemetry:\n  mock: true\nstreams: []\n", encoding="utf-8")
 
     raw = yaml.safe_load(config_file.read_text(encoding="utf-8")) or {}
-    streams = [StreamConfig.model_validate(item) for item in raw.get("streams", [])]
+    username = str((raw.get("rist_auth", {}) or {}).get("username", "")).strip()
+    stream_items = []
+    for item in raw.get("streams", []):
+        stream_item = dict(item)
+        if username and stream_item.get("name", "").strip() in {"", "YOUR_RIST_USERNAME"}:
+            stream_item["name"] = username
+        stream_items.append(stream_item)
+    streams = [StreamConfig.model_validate(item) for item in stream_items]
     return AppConfig(config_dir=config_dir, raw=raw, streams=streams)
 
 
