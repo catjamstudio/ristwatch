@@ -39,7 +39,7 @@ class TelemetryService:
         stream = self.streams[0]
         input_url = stream.input_url
         command = ["ristreceiver", "-i", input_url, "-o", "udp://127.0.0.1:10000", "-r", "127.0.0.1:5005", "-S", "1000", "-v", "6"]
-        logger.info("Starting RIST receiver for stream %s: %s", stream.id, " ".join(command))
+        print(f"Starting RIST receiver for stream {stream.id}: {' '.join(command)}", flush=True)
         if self.srp_file and os.path.exists(self.srp_file):
             command.extend(["-F", self.srp_file])
         await self.process.start(command)
@@ -63,11 +63,11 @@ class TelemetryService:
 
     async def _read_receiver(self, stream_id: str) -> None:
         async for line in self.process.output_lines():
-            logger.info("ristreceiver[%s]: %s", stream_id, line)
+            print(f"ristreceiver[{stream_id}]: {line}", flush=True)
             snapshot = self.parser.parse_log_line(line, stream_id)
             if snapshot:
                 self._latest[stream_id] = snapshot
-        logger.warning("ristreceiver[%s] exited; no further receiver telemetry will be available", stream_id)
+        print(f"ristreceiver[{stream_id}] exited; no further receiver telemetry will be available", flush=True)
 
     def snapshots(self) -> list[StreamSnapshot]:
         return [StreamSnapshot(config=stream, telemetry=self.snapshot(stream)) for stream in self.streams]
@@ -129,7 +129,7 @@ class _StatsProtocol(asyncio.DatagramProtocol):
         self.stream_id = stream_id
 
     def datagram_received(self, data: bytes, _addr: tuple[str, int]) -> None:
-        logger.info("Received libRIST stats datagram (%d bytes)", len(data))
+        print(f"Received libRIST stats datagram ({len(data)} bytes)", flush=True)
         self.service.ingest_stats(data, self.stream_id)
 
 
