@@ -42,8 +42,9 @@ COPY --from=frontend-build /build/frontend/dist/ /app/frontend/
 RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/healthcheck.sh \
     && mkdir -p /config/logs
 
-EXPOSE 8080/tcp 5100/udp
+EXPOSE 8080/tcp 2030/udp 2031/udp 5556/udp
 VOLUME ["/config"]
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/usr/local/bin/healthcheck.sh"]
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
 
