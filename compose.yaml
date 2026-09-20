@@ -9,10 +9,10 @@ services:
       RISTWATCH_RIST_ENABLED: "true"
       RISTWATCH_PROFILE: "1"
     ports:
-     - "18081:8080/tcp"
-     - "2030:2030/udp"
-     - "2031:2031/udp"
-     - "5556:5556/udp"
+     - "192.168.50.101:18081:8080/tcp"
+     - "192.168.50.101:2030:2030/udp"
+     - "192.168.50.101:2031:2031/udp"
+     - "192.168.50.101:5556:5556/udp"
     volumes:
       - ./.local/config:/config
     healthcheck:
