@@ -1,9 +1,11 @@
 import asyncio
+import json
 import logging
 import math
 import os
 import time
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 
 from app.models.stream import StreamConfig, StreamSnapshot
@@ -36,6 +38,7 @@ class TelemetryService:
         self.stats_timeout = stats_timeout
         self._last_stats_at = 0.0
         self._stats_transport: asyncio.DatagramTransport | None = None
+        self._snapshot_file = Path(os.getenv("RISTWATCH_CONFIG_DIR", "/config")) / "live-telemetry.json"
 
     async def start(self) -> None:
         if not self.rist_enabled or not self.streams:
@@ -78,6 +81,15 @@ class TelemetryService:
 
     def snapshot(self, stream: StreamConfig) -> TelemetrySnapshot:
         existing = self._latest.get(stream.id)
+        if existing is None and self._snapshot_file.exists():
+            try:
+                cached = json.loads(self._snapshot_file.read_text(encoding="utf-8"))
+                candidate = cached.get(stream.id)
+                if isinstance(candidate, dict):
+                    existing = TelemetrySnapshot.model_validate(candidate)
+                    self._latest[stream.id] = existing
+            except (OSError, ValueError, json.JSONDecodeError):
+                pass
         if existing is not None:
             return existing
         return self._mock_snapshot(stream) if not self.rist_enabled else TelemetrySnapshot(stream_id=stream.id)
@@ -111,6 +123,17 @@ class TelemetryService:
             print(f"Ignored non-statistics receiver datagram for {stream_id}: {line[:500]}", flush=True)
             return
         self._latest[stream_id] = snapshot
+        try:
+            self._snapshot_file.parent.mkdir(parents=True, exist_ok=True)
+            cached = {}
+            if self._snapshot_file.exists():
+                cached = json.loads(self._snapshot_file.read_text(encoding="utf-8"))
+            cached[stream_id] = snapshot.model_dump(mode="json")
+            temporary = self._snapshot_file.with_suffix(".tmp")
+            temporary.write_text(json.dumps(cached), encoding="utf-8")
+            temporary.replace(self._snapshot_file)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"Failed to persist telemetry for {stream_id}: {exc}", flush=True)
         self._last_stats_at = time.monotonic()
         print(
             f"Updated telemetry for {stream_id}: status={snapshot.status} "
