@@ -96,7 +96,7 @@ class TelemetryService:
         # libRIST sends both receiver-flow snapshots and cumulative counters.
         # Cumulative-only messages contain no peer/bitrate state and must not
         # overwrite the latest live receiver snapshot with OFFLINE.
-        if '"receiver-stats"' not in line and '"receiver_stats"' not in line:
+        if '"flowinstant"' not in line:
             return
         try:
             snapshot = self.parser.parse_log_line(line, stream_id)
