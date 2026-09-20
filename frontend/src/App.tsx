@@ -11,6 +11,7 @@ const formatSeconds = (value: number) => {
 
 function App() {
   const [streams, setStreams] = useState<StreamSnapshot[]>([]);
+  const [history, setHistory] = useState<number[]>([]);
   const [connected, setConnected] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -25,6 +26,10 @@ function App() {
       }
       return incoming.map((stream) => currentById.get(stream.config.id) ?? stream);
     });
+    const primary = incoming[0];
+    if (primary) {
+      setHistory((current) => [...current, primary.telemetry.bitrate_bps].slice(-60));
+    }
   };
 
   useEffect(() => {
@@ -110,7 +115,7 @@ function App() {
         </div>
       </section>
 
-      {selected && <StreamDetails stream={selected} />}
+      {selected && <StreamDetails stream={selected} history={history} />}
     </main>
   );
 }
@@ -119,12 +124,14 @@ function Summary({ label, value, alert = false }: { label: string; value: string
   return <article className="summary"><span>{label}</span><strong className={alert ? "alert" : ""}>{value}</strong></article>;
 }
 
-function StreamDetails({ stream }: { stream: StreamSnapshot }) {
+function StreamDetails({ stream, history }: { stream: StreamSnapshot; history: number[] }) {
   const telemetry = stream.telemetry;
+  const ageSeconds = Math.max(0, Math.round((Date.now() - new Date(telemetry.timestamp).getTime()) / 1000));
+  const live = telemetry.status !== "offline" && ageSeconds <= 3;
   return (
     <section className="details-grid">
       <article className="panel detail-panel">
-        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2></div><span className={`status ${telemetry.status}`}>{telemetry.status}</span></div>
+        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2></div><span className={`status ${live ? "healthy" : "offline"}`}>{live ? "live" : "stale"}</span></div>
         <div className="metric-grid">
           <Metric label="Current bitrate" value={formatMbps(telemetry.bitrate_bps)} />
           <Metric label="Average bitrate" value={formatMbps(telemetry.average_bitrate_bps)} />
@@ -133,7 +140,8 @@ function StreamDetails({ stream }: { stream: StreamSnapshot }) {
           <Metric label="Recovery" value={`${(telemetry.retries_bps / 1000).toFixed(1)} Kbps`} />
           <Metric label="Rejected" value={`${(telemetry.rejected_bps / 1000).toFixed(1)} Kbps`} />
         </div>
-        <div className="chart-placeholder"><span>Realtime history begins with the next milestone</span></div>
+        <div className="telemetry-meta">Last telemetry: {new Date(telemetry.timestamp).toLocaleTimeString()} · {ageSeconds}s ago</div>
+        <BitrateChart values={history} />
       </article>
       <article className="panel peers-panel">
         <div className="panel-heading"><div><span className="eyebrow">CONNECTIONS</span><h2>Peers</h2></div><span>{telemetry.peers.length}</span></div>
@@ -146,6 +154,13 @@ function StreamDetails({ stream }: { stream: StreamSnapshot }) {
       </article>
     </section>
   );
+}
+
+function BitrateChart({ values }: { values: number[] }) {
+  if (values.length < 2) return <div className="chart-placeholder"><span>Collecting bitrate history…</span></div>;
+  const max = Math.max(...values, 1);
+  const points = values.map((value, index) => `${(index / (values.length - 1)) * 100},${100 - (value / max) * 92}`).join(" ");
+  return <div className="chart"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Bitrate history"><polyline points={points} fill="none" vectorEffect="non-scaling-stroke" /></svg><span>Bitrate history · last {values.length}s</span></div>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
