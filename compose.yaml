@@ -4,6 +4,8 @@ services:
     image: ristwatch:dev
     container_name: ristwatch-dev
     restart: unless-stopped
+    networks:
+      - ristwatch-net
     environment:
       RISTWATCH_CONFIG_DIR: /config
       RISTWATCH_RIST_ENABLED: "true"
@@ -21,4 +23,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+networks:
+  ristwatch-net:
+    name: ristwatch-net
 
