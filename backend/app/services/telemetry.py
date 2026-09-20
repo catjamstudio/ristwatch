@@ -15,6 +15,8 @@ from app.services.health import HealthInputs, calculate_health
 
 logger = logging.getLogger(__name__)
 
+_LIVE_SNAPSHOTS: dict[str, TelemetrySnapshot] = {}
+
 
 class TelemetryService:
     def __init__(self, streams: list[StreamConfig], policy: dict, interval: float = 1, rist_enabled: bool = False, srp_file: str | None = None, stats_timeout: float = 3) -> None:
@@ -22,7 +24,9 @@ class TelemetryService:
         self.policy = policy
         self.interval = interval
         self.started_at = time.monotonic()
-        self._latest: dict[str, TelemetrySnapshot] = {}
+        # Keep live state at module scope so the stats listener and all API/
+        # WebSocket service references in this process read the same snapshot.
+        self._latest = _LIVE_SNAPSHOTS
         self.rist_enabled = rist_enabled
         self.srp_file = srp_file
         self.process = RistProcessManager()
