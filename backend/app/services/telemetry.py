@@ -93,7 +93,11 @@ class TelemetryService:
 
     def ingest_stats(self, payload: bytes, stream_id: str) -> None:
         line = payload.decode("utf-8", errors="replace").strip()
-        snapshot = self.parser.parse_log_line(line, stream_id)
+        try:
+            snapshot = self.parser.parse_log_line(line, stream_id)
+        except Exception as exc:  # keep the receiver alive while diagnosing external stats formats
+            print(f"Failed to parse libRIST stats for {stream_id}: {type(exc).__name__}: {exc}; raw={line[:500]!r}", flush=True)
+            return
         if snapshot is None:
             print(f"Ignored non-statistics receiver datagram for {stream_id}: {line[:500]}", flush=True)
             return
