@@ -52,5 +52,9 @@ td small, .peer small { color: #627b91; display: block; margin-top: 4px; }
 .chart polyline { stroke: #31e4b2; stroke-width: 2; }
 .peer { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px 20px; border-bottom: 1px solid rgba(135,170,202,.09); }
 .peer > div:last-child { text-align: right; }
+.system-list { padding: 8px 20px 16px; }
+.system-list div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid rgba(135,170,202,.09); font-size: .82rem; }
+.system-list span { color: #7690a8; }
+.system-list strong { text-align: right; overflow-wrap: anywhere; }
 @media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } .details-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { main { width: min(100% - 22px, 1500px); padding-top: 20px; } .topbar { align-items: flex-start; } .connection { margin-top: 8px; } .summary-grid { grid-template-columns: 1fr 1fr; gap: 9px; } .summary { padding: 15px; } .summary strong { font-size: 1.25rem; } .metric-grid { grid-template-columns: repeat(2, 1fr); } }

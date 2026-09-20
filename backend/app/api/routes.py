@@ -30,7 +30,23 @@ async def system(request: Request) -> dict:
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "mock_telemetry": config.mock_telemetry,
+        "rist_enabled": config.rist_enabled,
+        "receiver_running": request.app.state.telemetry.process.running,
+        "sender_running": request.app.state.telemetry.forwarder.running,
+        "image_revision": "unknown",
+        "last_config_reload": config.config_dir.joinpath("config.yaml").stat().st_mtime,
         "config_directory": str(config.config_dir),
+    }
+
+
+@router.get("/api/relay")
+async def relay(request: Request) -> dict:
+    service = request.app.state.telemetry
+    return {
+        "status": "running" if service.forwarder.running else "stopped",
+        "output_url": "rist://@:5556?cname=ristwatch-relay",
+        "receiver_running": service.process.running,
+        "sender_running": service.forwarder.running,
     }
 
 

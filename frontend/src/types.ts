@@ -34,3 +34,22 @@ export interface StreamSnapshot {
   };
 }
 
+export interface RelayStatus {
+  status: string;
+  output_url: string;
+  receiver_running: boolean;
+  sender_running: boolean;
+}
+
+export interface SystemStatus {
+  version: string;
+  python: string;
+  platform: string;
+  mock_telemetry: boolean;
+  rist_enabled: boolean;
+  receiver_running: boolean;
+  sender_running: boolean;
+  image_revision: string;
+  last_config_reload: number;
+}
+
