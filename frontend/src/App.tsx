@@ -78,7 +78,7 @@ function App() {
       <header className="topbar">
         <div>
           <span className="eyebrow">RIST CONTRIBUTION MONITOR</span>
-          <h1>RISTWatch</h1>
+          <h1>RISTWatch <small>0.5.0 · build 10</small></h1>
         </div>
         <div className="connection">
           <span className={`pulse ${connected ? "online" : "offline"}`} />

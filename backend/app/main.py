@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     await app.state.telemetry.stop()
 
 
-app = FastAPI(title="RISTWatch API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="RISTWatch API", version="0.5.0", lifespan=lifespan)
 app.include_router(router)
 
 frontend_dir = Path(__file__).resolve().parents[2] / "frontend"
