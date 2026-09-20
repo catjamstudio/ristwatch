@@ -64,7 +64,7 @@ def load_config() -> AppConfig:
     stream_items = []
     for item in raw.get("streams", []):
         stream_item = dict(item)
-        if username and stream_item.get("name", "").strip() in {"", "YOUR_RIST_USERNAME"}:
+        if username:
             stream_item["name"] = username
         stream_items.append(stream_item)
     streams = [StreamConfig.model_validate(item) for item in stream_items]
