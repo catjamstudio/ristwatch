@@ -105,7 +105,7 @@ function App() {
             <tbody>
               {streams.map((stream) => (
                 <tr key={stream.config.id} onClick={() => setSelectedId(stream.config.id)} className={selected?.config.id === stream.config.id ? "selected" : ""}>
-                  <td><strong>{stream.config.name}</strong></td>
+                  <td><strong>{stream.config.name}</strong><small>{system?.rist_username || "username not set"} / {system?.rist_password_mask || "password not set"}</small></td>
                   <td><span className={`status ${stream.telemetry.status}`}>{stream.telemetry.status}</span></td>
                   <td>{formatMbps(stream.telemetry.bitrate_bps)}</td>
                   <td>{stream.telemetry.rtt_ms.toFixed(1)} ms</td>
@@ -120,7 +120,7 @@ function App() {
         </div>
       </section>
 
-      {selected && <StreamDetails stream={selected} history={history} />}
+      {selected && <StreamDetails stream={selected} history={history} system={system} />}
       <section className="details-grid">
         <RelayPanel relay={relay} />
         <SystemPanel system={system} />
@@ -133,14 +133,14 @@ function Summary({ label, value, alert = false }: { label: string; value: string
   return <article className="summary"><span>{label}</span><strong className={alert ? "alert" : ""}>{value}</strong></article>;
 }
 
-function StreamDetails({ stream, history }: { stream: StreamSnapshot; history: number[] }) {
+function StreamDetails({ stream, history, system }: { stream: StreamSnapshot; history: number[]; system: SystemStatus | null }) {
   const telemetry = stream.telemetry;
   const ageSeconds = Math.max(0, Math.round((Date.now() - new Date(telemetry.timestamp).getTime()) / 1000));
   const live = telemetry.status !== "offline" && ageSeconds <= 3;
   return (
     <section className="details-grid">
       <article className="panel detail-panel">
-        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2><small>input UDP {stream.config.input_url.match(/:(\d+)/)?.[1] ?? "2030"}</small></div><span className={`status ${live ? "healthy" : "offline"}`}>{live ? "live" : "stale"}</span></div>
+        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2><small>{system?.rist_username || "username not set"} / {system?.rist_password_mask || "password not set"} · input UDP {stream.config.input_url.match(/:(\d+)/)?.[1] ?? "2030"}</small></div><span className={`status ${live ? "healthy" : "offline"}`}>{live ? "live" : "stale"}</span></div>
         <div className="metric-grid">
           <Metric label="Current bitrate" value={formatMbps(telemetry.bitrate_bps)} />
           <Metric label="Average bitrate" value={formatMbps(telemetry.average_bitrate_bps)} />
