@@ -48,8 +48,9 @@ class RistStatsParser:
         json_start = line.find("{")
         if json_start < 0:
             return None
+        json_end = line.rfind("}") + 1
         try:
-            return self.parse(line[json_start:], stream_id)
+            return self.parse(line[json_start:json_end], stream_id)
         except (ValueError, json.JSONDecodeError):
             return None
 

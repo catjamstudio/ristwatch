@@ -95,10 +95,15 @@ class TelemetryService:
         line = payload.decode("utf-8", errors="replace").strip()
         snapshot = self.parser.parse_log_line(line, stream_id)
         if snapshot is None:
-            logger.debug("Ignored non-statistics receiver datagram for %s: %s", stream_id, line[:500])
+            print(f"Ignored non-statistics receiver datagram for {stream_id}: {line[:500]}", flush=True)
             return
         self._latest[stream_id] = snapshot
         self._last_stats_at = time.monotonic()
+        print(
+            f"Updated telemetry for {stream_id}: status={snapshot.status} "
+            f"bitrate_bps={snapshot.bitrate_bps} peers={len(snapshot.peers)}",
+            flush=True,
+        )
 
     def _mock_snapshot(self, stream: StreamConfig) -> TelemetrySnapshot:
         elapsed = int(time.monotonic() - self.started_at)
