@@ -41,6 +41,10 @@ class AppConfig:
     def health_policy(self) -> dict[str, Any]:
         return dict(self.raw.get("health", {}))
 
+    @property
+    def stats_timeout_seconds(self) -> float:
+        return float(self.raw.get("stats", {}).get("timeout_seconds", 3))
+
 
 def load_config() -> AppConfig:
     config_dir = Path(os.getenv("RISTWATCH_CONFIG_DIR", "/config"))
@@ -58,4 +62,5 @@ def load_config() -> AppConfig:
     raw = yaml.safe_load(config_file.read_text(encoding="utf-8")) or {}
     streams = [StreamConfig.model_validate(item) for item in raw.get("streams", [])]
     return AppConfig(config_dir=config_dir, raw=raw, streams=streams)
+
 
