@@ -61,12 +61,10 @@ def load_config() -> AppConfig:
 
     raw = yaml.safe_load(config_file.read_text(encoding="utf-8")) or {}
     username = os.getenv("RISTWATCH_RIST_USERNAME", "").strip()
-    if not username:
-        username = str((raw.get("rist_auth", {}) or {}).get("username", "")).strip()
     stream_items = []
     for item in raw.get("streams", []):
         stream_item = dict(item)
-        stream_item["name"] = username or str(stream_item.get("id", "RIST Ingest"))
+        stream_item["name"] = username or "RIST Ingest"
         stream_items.append(stream_item)
     streams = [StreamConfig.model_validate(item) for item in stream_items]
     return AppConfig(config_dir=config_dir, raw=raw, streams=streams)

@@ -17,6 +17,7 @@ h2 { margin-top: 4px; font-size: 1.25rem; }
 .eyebrow { color: #6f8ead; font-size: .68rem; letter-spacing: .18em; font-weight: 800; }
 .topbar, .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .topbar { margin-bottom: 28px; }
+.identity { color: #6f8ead; font-size: .75rem; margin-top: 8px; }
 .connection { display: flex; align-items: center; gap: 9px; color: #9fb4c9; font-size: .88rem; }
 .pulse { width: 9px; height: 9px; border-radius: 50%; background: #67788a; box-shadow: 0 0 0 5px rgba(103,120,138,.1); }
 .pulse.online { background: #22d3a4; box-shadow: 0 0 0 5px rgba(34,211,164,.12); }

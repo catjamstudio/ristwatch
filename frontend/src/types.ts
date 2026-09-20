@@ -51,5 +51,7 @@ export interface SystemStatus {
   sender_running: boolean;
   image_revision: string;
   last_config_reload: number;
+  rist_username: string;
+  rist_password_mask: string;
 }
 

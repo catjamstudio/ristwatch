@@ -1,4 +1,5 @@
 import platform
+import os
 import sys
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -31,6 +32,8 @@ async def system(request: Request) -> dict:
         "python": sys.version.split()[0],
         "platform": platform.platform(),
         "mock_telemetry": config.mock_telemetry,
+        "rist_username": os.getenv("RISTWATCH_RIST_USERNAME", ""),
+        "rist_password_mask": "*" * len(os.getenv("RISTWATCH_RIST_PASSWORD", "")),
         "rist_enabled": config.rist_enabled,
         "receiver_running": request.app.state.telemetry.process.running,
         "sender_running": request.app.state.telemetry.forwarder.running,
