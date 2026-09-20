@@ -81,13 +81,15 @@ class TelemetryService:
 
     def snapshot(self, stream: StreamConfig) -> TelemetrySnapshot:
         existing = self._latest.get(stream.id)
-        if existing is None and self._snapshot_file.exists():
+        if self._snapshot_file.exists():
             try:
                 cached = json.loads(self._snapshot_file.read_text(encoding="utf-8"))
                 candidate = cached.get(stream.id)
                 if isinstance(candidate, dict):
-                    existing = TelemetrySnapshot.model_validate(candidate)
-                    self._latest[stream.id] = existing
+                    persisted = TelemetrySnapshot.model_validate(candidate)
+                    if existing is None or persisted.timestamp >= existing.timestamp:
+                        existing = persisted
+                        self._latest[stream.id] = persisted
             except (OSError, ValueError, json.JSONDecodeError):
                 pass
         if existing is not None:
