@@ -104,6 +104,8 @@ class TelemetryService:
                         self._latest[stream.id] = persisted
             except (OSError, ValueError, json.JSONDecodeError):
                 pass
+        if existing is not None and time.time() - existing.timestamp.timestamp() > self.stats_timeout:
+            return TelemetrySnapshot(stream_id=stream.id)
         if existing is not None:
             return existing
         return self._mock_snapshot(stream) if not self.rist_enabled else TelemetrySnapshot(stream_id=stream.id)
