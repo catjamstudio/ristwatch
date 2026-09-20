@@ -74,7 +74,7 @@ docker build -t ristwatch:dev .
 docker compose up -d
 ```
 
-Open `http://192.168.50.101:18081`. The Compose deployment binds its web and production RIST ports to the Unraid host at `192.168.50.101`.
+Open `http://localhost:18081`. The Compose deployment publishes the web and production RIST ports on the local host.
 
 Runtime data is written to `./.local/config` by the included Compose file. On Unraid, map `/mnt/user/appdata/ristwatch` to `/config` instead.
 
