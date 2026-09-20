@@ -129,6 +129,7 @@ class _StatsProtocol(asyncio.DatagramProtocol):
         self.stream_id = stream_id
 
     def datagram_received(self, data: bytes, _addr: tuple[str, int]) -> None:
+        logger.info("Received libRIST stats datagram (%d bytes)", len(data))
         self.service.ingest_stats(data, self.stream_id)
 
 
