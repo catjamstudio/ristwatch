@@ -37,6 +37,7 @@ class TelemetryService:
         self._reader_task: asyncio.Task | None = None
         self.stats_timeout = stats_timeout
         self._last_stats_at = 0.0
+        self._stream_started_at: dict[str, float] = {}
         self._stats_transport: asyncio.DatagramTransport | None = None
         self._snapshot_file = Path(os.getenv("RISTWATCH_CONFIG_DIR", "/config")) / "live-telemetry.json"
 
@@ -139,6 +140,8 @@ class TelemetryService:
             print(f"Ignored non-statistics receiver datagram for {stream_id}: {line[:500]}", flush=True)
             return
         self._latest[stream_id] = snapshot
+        self._stream_started_at.setdefault(stream_id, time.monotonic())
+        snapshot.uptime_seconds = int(time.monotonic() - self._stream_started_at[stream_id])
         try:
             self._snapshot_file.parent.mkdir(parents=True, exist_ok=True)
             cached = {}
