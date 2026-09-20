@@ -105,7 +105,7 @@ function App() {
             <tbody>
               {streams.map((stream) => (
                 <tr key={stream.config.id} onClick={() => setSelectedId(stream.config.id)} className={selected?.config.id === stream.config.id ? "selected" : ""}>
-                  <td><strong>{stream.config.name}</strong><small>{stream.config.id}</small></td>
+                  <td><strong>{stream.config.name}</strong></td>
                   <td><span className={`status ${stream.telemetry.status}`}>{stream.telemetry.status}</span></td>
                   <td>{formatMbps(stream.telemetry.bitrate_bps)}</td>
                   <td>{stream.telemetry.rtt_ms.toFixed(1)} ms</td>
@@ -140,7 +140,7 @@ function StreamDetails({ stream, history }: { stream: StreamSnapshot; history: n
   return (
     <section className="details-grid">
       <article className="panel detail-panel">
-        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2><small>{stream.config.id} · input UDP {stream.config.input_url.match(/:(\d+)/)?.[1] ?? "2030"}</small></div><span className={`status ${live ? "healthy" : "offline"}`}>{live ? "live" : "stale"}</span></div>
+        <div className="panel-heading"><div><span className="eyebrow">STREAM DETAIL</span><h2>{stream.config.name}</h2><small>input UDP {stream.config.input_url.match(/:(\d+)/)?.[1] ?? "2030"}</small></div><span className={`status ${live ? "healthy" : "offline"}`}>{live ? "live" : "stale"}</span></div>
         <div className="metric-grid">
           <Metric label="Current bitrate" value={formatMbps(telemetry.bitrate_bps)} />
           <Metric label="Average bitrate" value={formatMbps(telemetry.average_bitrate_bps)} />
