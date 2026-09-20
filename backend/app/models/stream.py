@@ -5,7 +5,7 @@ from .telemetry import TelemetrySnapshot
 
 class StreamConfig(BaseModel):
     id: str
-    name: str
+    name: str = ""
     enabled: bool = True
     input_url: str
     buffer_ms: int = Field(default=1800, ge=0)
