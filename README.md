@@ -82,6 +82,16 @@ Runtime data is written to `./.local/config` by the included Compose file. On Un
 
 At first startup, `config/default.yaml` is copied to `/config/config.yaml`. Health thresholds are configuration, not application constants. Set `telemetry.mock: false` only after the libRIST process adapter is enabled and validated against real receiver output.
 
+RIST credentials may be stored as the private runtime backup in `/config/config.yaml`:
+
+```yaml
+rist_auth:
+  username: "YOUR_USERNAME"
+  password: "YOUR_PASSWORD"
+```
+
+On Unraid this file is `/mnt/user/appdata/ristwatch/config.yaml`. Docker variables `RISTWATCH_RIST_USERNAME` and `RISTWATCH_RIST_PASSWORD`, when populated, override these file values. Keep real credentials out of Git and out of `config/default.yaml`.
+
 Never commit usernames, passwords, encryption secrets, public IP addresses, or production stream configuration.
 
 ## API
