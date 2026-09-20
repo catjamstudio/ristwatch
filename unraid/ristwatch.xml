@@ -7,7 +7,7 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/catjamstudio/ristwatch/issues</Support>
   <Project>https://github.com/catjamstudio/ristwatch</Project>
-  <Overview>Self-hosted RIST ingest monitoring and management appliance. Default ports are isolated from an existing MooRIST deployment.</Overview>
+  <Overview>RISTWatch 0.5.0 build 10. Live RIST ingest monitor and relay. Set the optional username/password variables here, or edit /mnt/user/appdata/ristwatch/config.yaml under rist_auth. Docker variables override config.yaml values.</Overview>
   <Category>MediaApp:Video Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:8080]/</WebUI>
   <ExtraParams/>
@@ -23,7 +23,7 @@
   <Config Name="RIST Secondary" Target="2031" Default="2031" Mode="udp" Description="Secondary RIST listener port." Type="Port" Display="always" Required="false" Mask="false"/>
   <Config Name="RIST Relay" Target="5556" Default="5556" Mode="udp" Description="RIST relay output listener." Type="Port" Display="always" Required="false" Mask="false"/>
   <Config Name="RIST Enabled" Target="RISTWATCH_RIST_ENABLED" Default="true" Description="Start the real ristreceiver listener on the Test RIST port." Type="Variable" Display="always" Required="true" Mask="false"/>
-  <Config Name="RIST Username" Target="RISTWATCH_RIST_USERNAME" Default="" Description="RIST SRP username. Stored as a Docker environment variable." Type="Variable" Display="always" Required="false" Mask="false"/>
-  <Config Name="RIST Password" Target="RISTWATCH_RIST_PASSWORD" Default="" Description="RIST SRP password. Stored as a masked Docker environment variable." Type="Variable" Display="always" Required="false" Mask="true"/>
+  <Config Name="RIST Username (optional override)" Target="RISTWATCH_RIST_USERNAME" Default="" Description="Optional override for rist_auth.username in /config/config.yaml. Leave blank to use the config file." Type="Variable" Display="always" Required="false" Mask="false"/>
+  <Config Name="RIST Password (optional override)" Target="RISTWATCH_RIST_PASSWORD" Default="" Description="Optional masked override for rist_auth.password in /config/config.yaml. Leave blank to use the config file." Type="Variable" Display="always" Required="false" Mask="true"/>
 </Container>
 
