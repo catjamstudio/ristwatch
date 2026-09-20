@@ -2,7 +2,7 @@ name: Test and build
 
 on:
   push:
-    branches: [main]
+    branches: [main, consolidated]
   pull_request:
   workflow_dispatch:
 
@@ -58,8 +58,8 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository_owner }}/ristwatch
           tags: |
-            type=raw,value=dev,enable={{is_default_branch}}
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=dev
+            type=raw,value=latest
             type=sha
             type=ref,event=tag
       - uses: docker/build-push-action@v6
