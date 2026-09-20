@@ -14,6 +14,7 @@ class HealthState(StrEnum):
 class PeerTelemetry(BaseModel):
     id: str
     cname: str | None = None
+    source_ip: str | None = None
     bitrate_bps: int = 0
     average_bitrate_bps: int = 0
     rtt_ms: float = 0

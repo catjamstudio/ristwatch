@@ -93,10 +93,19 @@ class RistStatsParser:
         return PeerTelemetry(
             id=str(peer.get("id", "unknown")),
             cname=str(peer["cname"]) if peer.get("cname") is not None else None,
+            source_ip=cls._peer_source_ip(peer),
             bitrate_bps=int(cls._number(values, "bitrate")),
             average_bitrate_bps=int(cls._number(values, "avg_bitrate")),
             rtt_ms=cls._number(values, "rtt"),
             average_rtt_ms=cls._number(values, "avg_rtt"),
             received_bytes=int(cls._number(values, "received_bytes")),
         )
+
+    @staticmethod
+    def _peer_source_ip(peer: Mapping[str, Any]) -> str | None:
+        for key in ("source_ip", "source_address", "address", "ip"):
+            value = peer.get(key)
+            if value:
+                return str(value)
+        return None
 

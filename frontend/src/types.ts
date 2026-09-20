@@ -3,6 +3,7 @@ export type HealthState = "healthy" | "degraded" | "unstable" | "offline";
 export interface PeerTelemetry {
   id: string;
   cname: string | null;
+  source_ip: string | null;
   bitrate_bps: number;
   average_bitrate_bps: number;
   rtt_ms: number;

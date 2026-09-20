@@ -156,7 +156,7 @@ function StreamDetails({ stream, history, system }: { stream: StreamSnapshot; hi
         <div className="panel-heading"><div><span className="eyebrow">CONNECTIONS</span><h2>Peers</h2></div><span>{telemetry.peers.length}</span></div>
         {telemetry.peers.map((peer) => (
           <div className="peer" key={peer.id}>
-            <div><strong>{peer.cname ?? peer.id}</strong><small>{peer.id}</small></div>
+            <div><strong>{peer.cname ?? `Peer ${peer.id}`}</strong><small>Peer ID: {peer.id}</small><small>Source IP: {peer.source_ip ?? "unavailable"}</small></div>
             <div><span>{formatMbps(peer.bitrate_bps)}</span><small>{peer.rtt_ms.toFixed(1)} ms RTT</small></div>
           </div>
         ))}
