@@ -9,6 +9,10 @@ telemetry:
 rist:
   enabled: false
 
+rist_auth:
+  username: ""
+  password: ""
+
 stats:
   # Local receiver statistics collector port.
   timeout_seconds: 3
